@@ -12,9 +12,11 @@ const rl = readline.createInterface({
   prompt: colors.blue("User: "),
 });
 
-// const history = [];
+const model = "gpt-3.5-turbo";
+const history = [];
 
-console.log("tty-chatGPT - v 1.0\n");
+console.log("tty-chatgpt - v 1.0");
+console.log(`modelo: ${colors.yellow(model)}\n`);
 
 async function main() {
   try {
@@ -25,18 +27,27 @@ async function main() {
         rl.close();
         return;
       }
+
+      history.push({ role: "user", content: input.trim() });
+
+      const mensajes = history;
+
       const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: input }],
+        model: model,
+        messages: mensajes,
         stream: true,
       });
 
       rl.output.write(colors.green("Chat: "));
 
+      let completionText = "";
+
       for await (const word of completion) {
+        completionText += word.choices[0]?.delta?.content || "";
         rl.output.write(word.choices[0]?.delta?.content || "");
       }
 
+      history.push({ role: "assistant", content: completionText });
       console.log();
       rl.prompt();
     });
