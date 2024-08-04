@@ -47,7 +47,7 @@ async function main() {
         rl.output.write(word.choices[0]?.delta?.content || "");
       }
 
-      history.push({ role: "assistant", content: completionText });
+      history.push({ role: "assistant", content: completionText.trim()});
       console.log();
       rl.prompt();
     });
