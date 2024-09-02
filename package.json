@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
-    "test": "node --no-deprecation main.js"
+    "start": "node --no-deprecation main.js"
   },
   "keywords": [],
   "author": "",

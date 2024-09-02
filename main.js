@@ -9,22 +9,37 @@ const openai = new OpenAI();
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
-  prompt: colors.blue("User: "),
+  prompt: colors.brightBlue("User: "),
 });
 
-const model = "gpt-3.5-turbo";
+const model = "gpt-4o-mini";
 const history = [];
 
 console.log("tty-chatgpt - v 1.0");
-console.log(`modelo: ${colors.yellow(model)}\n`);
+console.log(`modelo: ${colors.brightYellow(model)}\n`);
 
 async function main() {
   try {
     rl.prompt();
     rl.on("line", async (input) => {
       if (input.trim().toLowerCase() == "exit") {
-        rl.output.write(colors.yellow("Hasta luego.\n"));
+        rl.output.write(colors.brightYellow("Hasta luego.\n"));
         rl.close();
+        return;
+      }
+
+      const moderation = await openai.moderations.create({
+        input: input.trim(),
+      });
+
+      const results = moderation.results[0];
+
+      if (results.flagged) {
+        // console.log(results.categories);
+        // console.log(results.category_scores);
+        rl.output.write(colors.bgRed("CONTENIDO SENSIBLE"));
+        console.log();
+        rl.prompt();
         return;
       }
 
@@ -38,7 +53,7 @@ async function main() {
         stream: true,
       });
 
-      rl.output.write(colors.green("Chat: "));
+      rl.output.write(colors.brightGreen(`${model}: `));
 
       let completionText = "";
 
@@ -47,7 +62,7 @@ async function main() {
         rl.output.write(word.choices[0]?.delta?.content || "");
       }
 
-      history.push({ role: "assistant", content: completionText.trim()});
+      history.push({ role: "assistant", content: completionText.trim() });
       console.log();
       rl.prompt();
     });
